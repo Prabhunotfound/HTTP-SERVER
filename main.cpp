@@ -15,6 +15,7 @@
 #include "routes.h"
 #include <signal.h>
 #include <atomic>
+#include "middleware.h"
 
 using namespace std;
 
@@ -68,15 +69,26 @@ void worker()
 
         // Parse request
         HttpRequest req = HttpParser::parse(task.request);
-        cout << "\n---------Client Request-----------" << endl;
-        cout << "Method : " << req.method << endl;
-        cout << "Route Requested : " << req.path << endl;
-        cout << endl;
+        cout << "\n------------Client Request-----------" << endl;
 
         // Build response
         HttpResponse res;
+        runMiddlewares(req, res);
 
         bool found = router.route(req, res);
+
+        auto end = std::chrono::high_resolution_clock::now();
+        auto end_us = std::chrono::duration_cast<std::chrono::microseconds>(
+                          end.time_since_epoch())
+                          .count();
+
+        if (req.headers.count("__start_time"))
+        {
+            long start_us = stol(req.headers["__start_time"]);
+            cout << "[DONE] " << req.method << " "
+                 << req.path << " in "
+                 << (end_us - start_us) << " µs\n";
+        }
 
         if (!found)
         {
@@ -128,6 +140,20 @@ int main()
     cout << "Phase 6 server running on http://localhost:8080\n";
 
     registerRoutes(router);
+
+    addMiddleware([](HttpRequest &req, HttpResponse &res)
+                  {
+    auto start = std::chrono::high_resolution_clock::now();
+
+    cout << "[REQ] " << req.method << " " << req.path << endl;
+
+    // attach timestamp for later use
+    req.headers["__start_time"] =
+        std::to_string(
+            std::chrono::duration_cast<std::chrono::microseconds>(
+                start.time_since_epoch()
+            ).count()
+        ); });
 
     // Event loop
     while (running)
