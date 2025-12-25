@@ -37,20 +37,6 @@ The server supports graceful shutdown by stopping new accepts and allowing in‑
 
 ---
 
-## Project Structure
-
-src/
-├── main.cpp # epoll loop, thread pool, server lifecycle
-├── router.h
-├── routes.cpp # HTTP route definitions
-├── middleware.h
-├── middleware.cpp
-├── middleware_setup.cpp # middleware registration
-├── http_parser.h
-├── http_response.h
-├── metrics.h
-├── metrics.cpp
-
 ---
 
 ## How to Build
@@ -64,8 +50,10 @@ g++ src/main.cpp \
     src/middleware_setup.cpp \
     src/metrics.cpp \
     -o server -pthread
+```
 
 How to Run
 
+```bash
 ./server
 ```
