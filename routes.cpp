@@ -14,7 +14,7 @@ void registerRoutes(Router &router)
     router.get("/hello", [](const HttpRequest &, HttpResponse &res)
                {
         res.headers["Content-Type"] = "text/plain";
-        res.body = "Hello from /hello route\n"; });
+        res.body = "Hello from Prabhanshu \n"; });
 
     router.get("/time", [](const HttpRequest &, HttpResponse &res)
                {

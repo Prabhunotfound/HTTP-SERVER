@@ -21,14 +21,23 @@
 
 using namespace std;
 
-atomic<bool> running(true);
-
-#define PORT 8080
+#define PORT 2205
 #define MAX_EVENTS 1000
 #define THREAD_COUNT 4
 
+atomic<bool> running(true);
 Router router;
 unordered_map<int, string> client_ip_map;
+queue<Task> taskQueue;
+mutex queueMutex;
+condition_variable cv;
+
+struct Task
+{
+    int client_fd;
+    string request;
+    string client_ip;
+};
 
 void handleSignal(int)
 {
@@ -41,17 +50,6 @@ void make_non_blocking(int fd)
     int flags = fcntl(fd, F_GETFL, 0);
     fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
-
-struct Task
-{
-    int client_fd;
-    string request;
-    string client_ip;
-};
-
-queue<Task> taskQueue;
-mutex queueMutex;
-condition_variable cv;
 
 void worker()
 {
@@ -151,7 +149,7 @@ int main()
         workers.emplace_back(worker);
     }
 
-    cout << "Server running on http://localhost:8080\n";
+    cout << "Server running on http://localhost:" << PORT << "\n";
 
     registerRoutes(router); // Registering the routes
     registerMiddlewares();  // Registering the middlewares
