@@ -73,6 +73,7 @@ void worker()
 
         // Build response
         HttpResponse res;
+
         runMiddlewares(req, res);
 
         bool found = router.route(req, res);
@@ -137,9 +138,9 @@ int main()
         workers.emplace_back(worker);
     }
 
-    cout << "Phase 6 server running on http://localhost:8080\n";
+    cout << "Server running on http://localhost:8080\n";
 
-    registerRoutes(router);
+    registerRoutes(router); // Registering the routes
 
     addMiddleware([](HttpRequest &req, HttpResponse &res)
                   {
