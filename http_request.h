@@ -11,4 +11,5 @@ struct HttpRequest
     string version;
     unordered_map<string, string> headers;
     string body;
+    string client_ip;
 };
