@@ -52,6 +52,21 @@ void make_non_blocking(int fd)
     fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
+long compute_latency_from_header(const HttpRequest &req)
+{
+    if (!req.headers.count("__start_time"))
+        return 0;
+
+    long start_us = stol(req.headers.at("__start_time"));
+
+    auto now = chrono::high_resolution_clock::now();
+    long now_us = chrono::duration_cast<chrono::microseconds>(
+                      now.time_since_epoch())
+                      .count();
+
+    return now_us - start_us;
+}
+
 void worker()
 {
     while (true)
@@ -103,12 +118,9 @@ void worker()
             write(task.client_fd, res.toString().c_str(), res.toString().size());
         }
 
-        auto end = chrono::high_resolution_clock::now();
-        auto latency =
-            chrono::duration_cast<chrono::microseconds>(end - start).count();
-
+        auto latency = compute_latency_from_header(req);
         cout << "[DONE] " << req.method << " " << req.path
-             << " in " << latency << " us" << endl;
+             << " in " << latency << " µs" << endl;
 
         record_request(latency);
         active_connections--;
