@@ -65,12 +65,14 @@ void worker()
             task = taskQueue.front();
             taskQueue.pop();
         }
+
         // Parse request
         HttpRequest req = HttpParser::parse(task.request);
         cout << "\n---------Client Request-----------" << endl;
         cout << "Method : " << req.method << endl;
         cout << "Route Requested : " << req.path << endl;
         cout << endl;
+
         // Build response
         HttpResponse res;
 
