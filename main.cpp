@@ -28,9 +28,6 @@ using namespace std;
 atomic<bool> running(true);
 Router router;
 unordered_map<int, string> client_ip_map;
-queue<Task> taskQueue;
-mutex queueMutex;
-condition_variable cv;
 
 struct Task
 {
@@ -38,6 +35,10 @@ struct Task
     string request;
     string client_ip;
 };
+
+queue<Task> taskQueue;
+mutex queueMutex;
+condition_variable cv;
 
 void handleSignal(int)
 {
