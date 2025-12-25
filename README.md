@@ -1,51 +1,71 @@
-# HTTP-SERVER
+# High-Performance HTTP Server (C++)
 
-# High-Performance HTTP Server in C++
-
-A lightweight, high-performance HTTP server built from scratch in **C++**, using **epoll**, **non-blocking I/O**, and a **thread pool**.  
-This project demonstrates low-level networking, concurrency, middleware design, and observability concepts used in real backend systems.
+A lightweight HTTP server built in C++ using epoll, non-blocking sockets, and a thread pool to demonstrate low-level networking, concurrency, and backend system design.
 
 ---
 
-## 🚀 Features
+## Features (One‑Line Each)
 
-### Core Architecture
-
-- Non-blocking socket server (Linux)
-- `epoll`-based event-driven I/O
-- Thread pool for request processing
-- Graceful shutdown using signals
-- Clean modular architecture
-
-### HTTP & Routing
-
-- Basic HTTP request parsing
-- Response builder
-- Route-based request handling
-- Separate route definition files
-
-### Middleware System
-
-- Middleware pipeline (pre-routing)
-- Request logging
-- Rate limiting
-- Easily extensible middleware design
-
-### Metrics & Observability
-
-- Active connection tracking
-- Total request counter
-- Average request latency
-- `/metrics` endpoint
-- Per-request latency logging
-
-### Reliability
-
-- Thread-safe queues
-- Atomic counters
-- Clean resource cleanup
-- Safe shutdown on SIGINT / SIGTERM
+- Uses Linux `epoll` for scalable, event‑driven I/O handling.
+- Supports non‑blocking sockets for efficient concurrent connections.
+- Implements a thread pool to process requests in parallel.
+- Provides a modular routing system for handling endpoints.
+- Supports middleware execution before routing.
+- Includes request logging middleware.
+- Implements IP‑based rate limiting.
+- Tracks runtime metrics such as total requests and latency.
+- Exposes a `/metrics` endpoint for observability.
+- Handles graceful shutdown using OS signals.
+- Uses atomic counters for thread‑safe statistics.
+- Designed with clean separation of concerns.
 
 ---
 
-## 🧠 High-Level Architecture
+## How the Server Works (Brief Explanation)
+
+The server starts by creating a non‑blocking socket and registers it with `epoll`.  
+The main thread continuously waits for socket events and accepts new client connections.
+
+Incoming connections are pushed into a task queue, which is processed by a pool of worker threads.  
+Each worker parses the HTTP request, runs middleware, and then forwards the request to the router.
+
+Middleware executes logic such as logging and rate limiting before the route handler runs.  
+The router generates the response, which is written back to the client socket.
+
+During request handling, metrics such as request count, active connections, and latency are recorded using atomic counters.  
+The server supports graceful shutdown by stopping new accepts and allowing in‑flight requests to finish cleanly.
+
+---
+
+## Project Structure
+
+src/
+├── main.cpp # epoll loop, thread pool, server lifecycle
+├── router.h
+├── routes.cpp # HTTP route definitions
+├── middleware.h
+├── middleware.cpp
+├── middleware_setup.cpp # middleware registration
+├── http_parser.h
+├── http_response.h
+├── metrics.h
+├── metrics.cpp
+
+---
+
+## How to Build
+
+Copy and run the following command:
+
+```bash
+g++ src/main.cpp \
+    src/routes.cpp \
+    src/middleware.cpp \
+    src/middleware_setup.cpp \
+    src/metrics.cpp \
+    -o server -pthread
+
+How to Run
+
+./server
+```
